@@ -1,0 +1,53 @@
+name: Build & Verify
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-verify:
+    name: Build SkyScan (macOS & iOS)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Select Latest Stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Display Environment Info
+        run: |
+          xcode-select -p
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode Project Spec
+        run: xcodegen generate
+
+      - name: Build macOS App & Widget
+        run: |
+          xcodebuild -project SkyScan.xcodeproj \
+            -scheme SkyScan \
+            -destination "platform=macOS" \
+            build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Build iOS App & Widget (Simulator)
+        run: |
+          xcodebuild -project SkyScan.xcodeproj \
+            -scheme SkyScan-iOS \
+            -sdk iphonesimulator \
+            -destination "generic/platform=iOS Simulator" \
+            build CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY=""

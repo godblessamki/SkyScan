@@ -4,6 +4,7 @@
 
 ### Real-Time Overhead Aircraft Tracker & Interactive Widgets for macOS & iOS
 
+[![Build & Verify](https://github.com/godblessamki/SkyScan/actions/workflows/build.yml/badge.svg)](https://github.com/godblessamki/SkyScan/actions/workflows/build.yml)
 [![Swift 5.9+](https://img.shields.io/badge/Swift-5.9%2B-FA7343?logo=swift&logoColor=white)](https://swift.org)
 [![macOS 14.0+](https://img.shields.io/badge/macOS-14.0%2B%20(Sonoma%2FSequoia)-000000?logo=apple&logoColor=white)](https://apple.com/macos)
 [![iOS 17.0+](https://img.shields.io/badge/iOS-17.0%2B-000000?logo=apple&logoColor=white)](https://apple.com/ios)
