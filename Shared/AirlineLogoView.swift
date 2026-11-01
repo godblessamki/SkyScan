@@ -14,8 +14,9 @@ public struct AirlineLogoView: View {
     public var body: some View {
         ZStack {
             #if os(macOS)
-            if let data = logoData, let nsImg = NSImage(data: data) {
+            if let data = logoData, let nsImg = makeNSImage(from: data) {
                 Image(nsImage: nsImg)
+                    .renderingMode(.original)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .padding(2)
@@ -25,6 +26,7 @@ public struct AirlineLogoView: View {
             #else
             if let data = logoData, let uiImg = UIImage(data: data) {
                 Image(uiImage: uiImg)
+                    .renderingMode(.original)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .padding(2)
@@ -34,20 +36,25 @@ public struct AirlineLogoView: View {
             #endif
         }
         .frame(width: size, height: size)
-        .background(Color.white.opacity(0.92))
+        .background(Color.white) // 100% solid opaque background to block liquid glass & transparency
         .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
-                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
-        )
+        .compositingGroup() // Isolates the view from liquid glass, backdrop filters & vibrancy shaders
     }
+
+    #if os(macOS)
+    private func makeNSImage(from data: Data) -> NSImage? {
+        guard let img = NSImage(data: data) else { return nil }
+        img.isTemplate = false // Never treat as monochrome template mask
+        return img
+    }
+    #endif
 
     private var fallback: some View {
         ZStack {
-            Color.cyan.opacity(0.25)
+            Color(white: 0.15)
             Text(fallbackText.prefix(2).uppercased())
                 .font(.system(size: max(8, size * 0.42), weight: .bold, design: .monospaced))
-                .foregroundStyle(.black)
+                .foregroundStyle(.cyan)
         }
     }
 }
