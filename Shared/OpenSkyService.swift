@@ -43,7 +43,7 @@ public actor OpenSkyService {
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.timeoutInterval = 10.0
+        request.timeoutInterval = 8.0
         request.setValue("SkyScanApp/1.0 (macOS/iOS Widget; contact: admin@example.com)", forHTTPHeaderField: "User-Agent")
 
         let (data, response) = try await session.data(for: request)
@@ -53,7 +53,6 @@ public actor OpenSkyService {
         }
 
         if httpResponse.statusCode == 429 {
-            // Rate limited: Return cached flights if available
             return UserDefaults.appGroup.cachedFlights
         }
 
@@ -80,7 +79,6 @@ public actor OpenSkyService {
 
             let originCountry = (row[2] as? String) ?? "Unknown"
 
-            // Longitude & Latitude
             guard let lon = (row[5] as? NSNumber)?.doubleValue,
                   let lat = (row[6] as? NSNumber)?.doubleValue else {
                 continue
@@ -110,21 +108,31 @@ public actor OpenSkyService {
                 userLocation: center
             )
 
-            // Only keep flights within the requested radius
             if flight.distanceMiles <= radiusMiles {
                 rawFlights.append(flight)
             }
         }
 
-        // Sort closest first
-        rawFlights.sort { $0.distanceMiles < $1.distanceMiles }
+        // Smart Airspace Ranking:
+        // 1. Directly overhead aircraft first (<3 mi or >=35° elev)
+        // 2. Commercial flights with known airline logos next
+        // 3. Closest ground distance
+        rawFlights.sort { a, b in
+            if a.isDirectlyOverhead != b.isDirectlyOverhead {
+                return a.isDirectlyOverhead && !b.isDirectlyOverhead
+            }
+            if a.isCommercial != b.isCommercial {
+                return a.isCommercial && !b.isCommercial
+            }
+            return a.distanceMiles < b.distanceMiles
+        }
 
-        // Enrich the top 6 closest flights with metadata, routes & logos
-        let topFlights = Array(rawFlights.prefix(6))
-        let remainingFlights = Array(rawFlights.dropFirst(6))
+        // Enrich the top 12 flights concurrently
+        let toEnrich = Array(rawFlights.prefix(12))
+        let remaining = Array(rawFlights.dropFirst(12))
 
-        let enrichedTop = await AircraftEnrichmentService.shared.enrichFlights(topFlights)
-        let finalFlights = enrichedTop + remainingFlights
+        let enriched = await AircraftEnrichmentService.shared.enrichFlights(toEnrich)
+        let finalFlights = enriched + remaining
 
         // Cache for widget or offline access
         UserDefaults.appGroup.cachedFlights = finalFlights

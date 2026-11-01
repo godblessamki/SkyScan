@@ -31,6 +31,10 @@ public struct Flight: Identifiable, Codable, Hashable, Sendable {
     public var routeString: String?
     public var airlineLogoData: Data?
 
+    public var isCommercial: Bool {
+        airlineIATA != nil
+    }
+
     public let originCountry: String
     public let latitude: Double
     public let longitude: Double

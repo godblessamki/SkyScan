@@ -83,7 +83,7 @@ struct SmallWidgetView: View {
             if let flight = entry.closestFlight {
                 // Airline logo + Flight Number
                 HStack(spacing: 5) {
-                    AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 20)
+                    AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 24, isCommercial: flight.isCommercial)
 
                     Text(flight.flightNumber ?? flight.callsign)
                         .font(.system(size: 14, weight: .black, design: .monospaced))
@@ -185,7 +185,7 @@ struct MediumWidgetView: View {
                 // Top row: Airline logo + Flight Number + Airline Name + Refresh Intent Button
                 HStack(spacing: 6) {
                     if let flight = entry.closestFlight {
-                        AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 24)
+                        AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 28, isCommercial: flight.isCommercial)
 
                         VStack(alignment: .leading, spacing: 1) {
                             Text(flight.flightNumber ?? flight.callsign)
@@ -355,7 +355,7 @@ struct LargeWidgetView: View {
                 } else {
                     ForEach(entry.flights.prefix(3)) { flight in
                         HStack(spacing: 6) {
-                            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 20)
+                            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 24, isCommercial: flight.isCommercial)
 
                             VStack(alignment: .leading, spacing: 1) {
                                 HStack(spacing: 4) {

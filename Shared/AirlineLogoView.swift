@@ -1,60 +1,54 @@
 import SwiftUI
+import CoreGraphics
+import ImageIO
 
 public struct AirlineLogoView: View {
     public let logoData: Data?
     public let fallbackText: String
     public let size: CGFloat
+    public let isCommercial: Bool
 
-    public init(logoData: Data?, fallbackText: String, size: CGFloat = 28) {
+    public init(logoData: Data?, fallbackText: String, size: CGFloat = 28, isCommercial: Bool = false) {
         self.logoData = logoData
         self.fallbackText = fallbackText
         self.size = size
+        self.isCommercial = isCommercial
     }
 
     public var body: some View {
-        ZStack {
-            #if os(macOS)
-            if let data = logoData, let nsImg = makeNSImage(from: data) {
-                Image(nsImage: nsImg)
-                    .renderingMode(.original)
+        Group {
+            if let data = logoData, let cgImg = makeCGImage(from: data) {
+                // Real Airline Logo: Solid White Card (bypasses liquid glass, vibrancy & transparency)
+                Image(decorative: cgImg, scale: 2.0)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .padding(2)
+                    .frame(width: size, height: size)
+                    .background(Color.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                    .compositingGroup()
             } else {
-                fallback
+                // General Aviation / Private Aircraft / Missing Logo Fallback: Sleek avionics dark badge
+                ZStack {
+                    Color.white.opacity(0.12)
+                    if isCommercial {
+                        Text(fallbackText.prefix(2).uppercased())
+                            .font(.system(size: max(8, size * 0.42), weight: .black, design: .monospaced))
+                            .foregroundStyle(.cyan)
+                    } else {
+                        Image(systemName: "airplane")
+                            .font(.system(size: size * 0.48, weight: .semibold))
+                            .foregroundStyle(.cyan.opacity(0.85))
+                    }
+                }
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             }
-            #else
-            if let data = logoData, let uiImg = UIImage(data: data) {
-                Image(uiImage: uiImg)
-                    .renderingMode(.original)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .padding(2)
-            } else {
-                fallback
-            }
-            #endif
         }
-        .frame(width: size, height: size)
-        .background(Color.white) // 100% solid opaque background to block liquid glass & transparency
-        .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
-        .compositingGroup() // Isolates the view from liquid glass, backdrop filters & vibrancy shaders
     }
 
-    #if os(macOS)
-    private func makeNSImage(from data: Data) -> NSImage? {
-        guard let img = NSImage(data: data) else { return nil }
-        img.isTemplate = false // Never treat as monochrome template mask
-        return img
-    }
-    #endif
-
-    private var fallback: some View {
-        ZStack {
-            Color(white: 0.15)
-            Text(fallbackText.prefix(2).uppercased())
-                .font(.system(size: max(8, size * 0.42), weight: .bold, design: .monospaced))
-                .foregroundStyle(.cyan)
-        }
+    private func makeCGImage(from data: Data) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        return CGImageSourceCreateImageAtIndex(source, 0, nil)
     }
 }

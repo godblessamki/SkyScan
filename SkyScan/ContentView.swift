@@ -243,7 +243,7 @@ struct FlightRowCard: View {
     var body: some View {
         HStack(spacing: 12) {
             // Airline Logo
-            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 38)
+            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 38, isCommercial: flight.isCommercial)
 
             // Flight info
             VStack(alignment: .leading, spacing: 2) {

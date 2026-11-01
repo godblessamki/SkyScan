@@ -11,7 +11,7 @@ public struct FlightDetailSheet: View {
                     // Header Airline Card
                     VStack(spacing: 12) {
                         HStack(spacing: 14) {
-                            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 52)
+                            AirlineLogoView(logoData: flight.airlineLogoData, fallbackText: flight.callsign, size: 52, isCommercial: flight.isCommercial)
 
                             VStack(alignment: .leading, spacing: 3) {
                                 HStack(spacing: 8) {
