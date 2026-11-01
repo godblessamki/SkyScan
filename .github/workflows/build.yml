@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build-and-verify:
     name: Build SkyScan (macOS & iOS)
-    runs-on: macos-14
+    runs-on: macos-15
 
     steps:
       - name: Checkout Repository
