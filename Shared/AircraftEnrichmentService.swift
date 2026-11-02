@@ -57,7 +57,7 @@ public actor AircraftEnrichmentService {
     public func enrichSingleFlight(_ inputFlight: Flight) async -> Flight {
         var flight = inputFlight
 
-        // 1. Fetch Airline Logo (if commercial flight)
+        // 1. If commercial flight, fetch airline logo
         if flight.airlineLogoData == nil, let iata = flight.airlineIATA {
             flight.airlineLogoData = await fetchLogoData(iata: iata)
         }
@@ -70,6 +70,18 @@ public actor AircraftEnrichmentService {
                 flight.registration = meta.registration
                 if flight.airlineName == nil, let owner = meta.owner, !owner.isEmpty {
                     flight.airlineName = owner
+                }
+
+                // If airlineIATA was not matched from callsign, attempt to match from registered owner
+                if flight.airlineIATA == nil, let owner = meta.owner, !owner.isEmpty {
+                    if let matchedAirline = AirlineDatabase.shared.findAirlineByName(owner) {
+                        flight.airlineName = matchedAirline.name
+                        flight.airlineIATA = matchedAirline.iata
+                        // Fetch logo now that airline IATA is resolved
+                        if flight.airlineLogoData == nil {
+                            flight.airlineLogoData = await fetchLogoData(iata: matchedAirline.iata)
+                        }
+                    }
                 }
             }
         }
@@ -88,36 +100,53 @@ public actor AircraftEnrichmentService {
         return flight
     }
 
-    // MARK: - Logo Fetching & Thumbnail Resizing
+    // MARK: - Logo Fetching & Caching (Kiwi Primary + Kayak Fallback + Disk Cache)
     private func fetchLogoData(iata: String) async -> Data? {
         let key = iata.uppercased()
         if let cached = logoCache[key] {
             return cached
         }
 
-        guard let url = URL(string: "https://content.r9cdn.net/rimg/provider-logos/airlines/v/\(key).png") else {
-            return nil
+        // 1. Check local persistent disk cache first
+        if let diskData = loadLogoFromDisk(key: key) {
+            logoCache[key] = diskData
+            return diskData
         }
 
-        do {
-            var req = URLRequest(url: url)
-            req.timeoutInterval = 3.0
-            let (data, response) = try await session.data(for: req)
-            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
-                return nil
-            }
+        // 2. Candidate CDNs in order of reliability & speed:
+        //    a. Kiwi CDN (crisp 64x64 pre-cropped PNGs)
+        //    b. Kayak CDN (vector/high-res PNGs)
+        let candidates = [
+            URL(string: "https://images.kiwi.com/airlines/64x64/\(key).png"),
+            URL(string: "https://content.r9cdn.net/rimg/provider-logos/airlines/v/\(key).png")
+        ].compactMap { $0 }
 
-            // Optimize & resize image into a clean 100x100 thumbnail for widgets
-            if let resizedData = resizeImageToThumbnail(data: data, maxPixelSize: 100) {
-                logoCache[key] = resizedData
-                return resizedData
-            } else {
-                logoCache[key] = data
-                return data
+        for url in candidates {
+            do {
+                var req = URLRequest(url: url)
+                req.timeoutInterval = 3.0
+                let (data, response) = try await session.data(for: req)
+                guard let http = response as? HTTPURLResponse, http.statusCode == 200, data.count > 100 else {
+                    continue
+                }
+
+                // If image is larger than 120px, optimize to clean 100px thumbnail
+                let finalData: Data
+                if let resized = resizeImageToThumbnail(data: data, maxPixelSize: 100) {
+                    finalData = resized
+                } else {
+                    finalData = data
+                }
+
+                logoCache[key] = finalData
+                saveLogoToDisk(key: key, data: finalData)
+                return finalData
+            } catch {
+                continue
             }
-        } catch {
-            return nil
         }
+
+        return nil
     }
 
     private func resizeImageToThumbnail(data: Data, maxPixelSize: CGFloat) -> Data? {
@@ -143,6 +172,29 @@ public actor AircraftEnrichmentService {
         let uiImg = UIImage(cgImage: thumb)
         return uiImg.pngData()
         #endif
+    }
+
+    // MARK: - Disk Cache Helpers
+    private var cacheDirectory: URL? {
+        let fileManager = FileManager.default
+        guard let caches = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
+        let dir = caches.appendingPathComponent("AirlineLogos", isDirectory: true)
+        if !fileManager.fileExists(atPath: dir.path) {
+            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
+        }
+        return dir
+    }
+
+    private func loadLogoFromDisk(key: String) -> Data? {
+        guard let dir = cacheDirectory else { return nil }
+        let file = dir.appendingPathComponent("\(key).png")
+        return try? Data(contentsOf: file)
+    }
+
+    private func saveLogoToDisk(key: String, data: Data) {
+        guard let dir = cacheDirectory else { return }
+        let file = dir.appendingPathComponent("\(key).png")
+        try? data.write(to: file, options: .atomic)
     }
 
     // MARK: - Aircraft Metadata via hexdb.io

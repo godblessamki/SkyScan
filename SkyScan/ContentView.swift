@@ -187,6 +187,9 @@ public struct ContentView: View {
                 locationManager.requestLocation()
                 fetchFlights()
             }
+            .onReceive(locationManager.$currentLocation.compactMap { $0 }) { _ in
+                fetchFlights()
+            }
             .task {
                 while !Task.isCancelled {
                     try? await Task.sleep(nanoseconds: 15_000_000_000)
