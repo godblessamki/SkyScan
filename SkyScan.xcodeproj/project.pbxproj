@@ -28,7 +28,9 @@
 		51883E97E1CC5F365B150128 /* OpenSkyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F93FC5A24BB240EBF03B9C8 /* OpenSkyService.swift */; };
 		53525291EE236A229F952B82 /* AircraftEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EFFED75A63E661E35BE91C /* AircraftEnrichmentService.swift */; };
 		5E1926786BA95A3FC85532C4 /* AirlineLogoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B4CD6A5A451B92337430805 /* AirlineLogoView.swift */; };
+		5F1F3C146C2C51DCF11694B1 /* AirlineLogoDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */; };
 		6F4163C2FE099DEF2A9CD2B1 /* FlightDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046844E7676C79DAFB4DDC30 /* FlightDetailSheet.swift */; };
+		70F3DDAFBAAF0E037D246ACC /* AirlineLogoDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */; };
 		711B0E4D2517D1D988C93AF6 /* AircraftEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EFFED75A63E661E35BE91C /* AircraftEnrichmentService.swift */; };
 		82AD19725905844C6D9B7ED4 /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606310DC885593313B6FC06B /* Flight.swift */; };
 		8B1A6649A8D3F37B929F0439 /* AirlineDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2256C3858E3997DC623A924 /* AirlineDatabase.swift */; };
@@ -40,10 +42,12 @@
 		9D4E66ABBAA52EBAE6C15E0C /* SkyScanWidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7B1F8FFE3DB94E2EBBC728C /* SkyScanWidgetViews.swift */; };
 		A48E55F27E0168251284FFD5 /* AirlineDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2256C3858E3997DC623A924 /* AirlineDatabase.swift */; };
 		A8AD622C0A2AE6469374A97F /* FlightDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046844E7676C79DAFB4DDC30 /* FlightDetailSheet.swift */; };
+		B3539596D0CF2F04A624914C /* AirlineLogoDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */; };
 		B425042F25DCA05087EF3A16 /* AircraftEnrichmentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EFFED75A63E661E35BE91C /* AircraftEnrichmentService.swift */; };
 		B558E8BEF2A53BF0A9CB801F /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B1849EFB6F7D0D73EA42C0 /* RadarView.swift */; };
 		B8194756605FA7D140843087 /* RefreshFlightsIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 175C863FB2DEFDC74BDC0897 /* RefreshFlightsIntent.swift */; };
 		BAB7812036B8E4CEE747BCCD /* Flight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 606310DC885593313B6FC06B /* Flight.swift */; };
+		BE59B656C96F3A778A7C3CDA /* AirlineLogoDiskCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */; };
 		C51B642F9077D1B691BA80A9 /* RadarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7B1849EFB6F7D0D73EA42C0 /* RadarView.swift */; };
 		CB65922030C0F604E157809B /* SkyScanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C84F0E04DF869BA3B5D2272 /* SkyScanWidget.swift */; };
 		D407EE7622E2C4540245A34F /* SkyScanWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C84F0E04DF869BA3B5D2272 /* SkyScanWidget.swift */; };
@@ -108,6 +112,7 @@
 		1C84F0E04DF869BA3B5D2272 /* SkyScanWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyScanWidget.swift; sourceTree = "<group>"; };
 		293670E6CD0B515EA7DB0C38 /* SkyScan.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SkyScan.entitlements; sourceTree = "<group>"; };
 		2B94F6B08FCE3D5C9A54AB8D /* SkyScanApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkyScanApp.swift; sourceTree = "<group>"; };
+		370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AirlineLogoDiskCache.swift; sourceTree = "<group>"; };
 		4134BD7662B94B0839135074 /* SkyScan-iOS.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = "SkyScan-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D8D3CCFE6CD0573330D5C96 /* SkyScanWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SkyScanWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E384B714FBBAF82DB1D03E8 /* SkyScanWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SkyScanWidget.entitlements; sourceTree = "<group>"; };
@@ -181,6 +186,7 @@
 			children = (
 				E8EFFED75A63E661E35BE91C /* AircraftEnrichmentService.swift */,
 				D2256C3858E3997DC623A924 /* AirlineDatabase.swift */,
+				370421B286ECAFA14741D179 /* AirlineLogoDiskCache.swift */,
 				7B4CD6A5A451B92337430805 /* AirlineLogoView.swift */,
 				606310DC885593313B6FC06B /* Flight.swift */,
 				99FBF51D195FDAE60A354771 /* LocationManager.swift */,
@@ -322,6 +328,7 @@
 			files = (
 				711B0E4D2517D1D988C93AF6 /* AircraftEnrichmentService.swift in Sources */,
 				8B1A6649A8D3F37B929F0439 /* AirlineDatabase.swift in Sources */,
+				5F1F3C146C2C51DCF11694B1 /* AirlineLogoDiskCache.swift in Sources */,
 				4EDE4FFC85D8704089586C25 /* AirlineLogoView.swift in Sources */,
 				82AD19725905844C6D9B7ED4 /* Flight.swift in Sources */,
 				26CE4D0FE964B38AAA8E70F4 /* LocationManager.swift in Sources */,
@@ -340,6 +347,7 @@
 			files = (
 				53525291EE236A229F952B82 /* AircraftEnrichmentService.swift in Sources */,
 				A48E55F27E0168251284FFD5 /* AirlineDatabase.swift in Sources */,
+				B3539596D0CF2F04A624914C /* AirlineLogoDiskCache.swift in Sources */,
 				269A1234235A9B708BE73A31 /* AirlineLogoView.swift in Sources */,
 				EBF4983670A7021B60E050E9 /* Flight.swift in Sources */,
 				45BBEEAD11E882CBE36A10FE /* LocationManager.swift in Sources */,
@@ -358,6 +366,7 @@
 			files = (
 				905A4F84E7C314ABFB9DFA7F /* AircraftEnrichmentService.swift in Sources */,
 				9A30BF94B28AD32ADB059B72 /* AirlineDatabase.swift in Sources */,
+				70F3DDAFBAAF0E037D246ACC /* AirlineLogoDiskCache.swift in Sources */,
 				5E1926786BA95A3FC85532C4 /* AirlineLogoView.swift in Sources */,
 				08BCDA431CAB1C48D6ED0B1C /* ContentView.swift in Sources */,
 				ED0FA0A018ED887D9685E690 /* Flight.swift in Sources */,
@@ -378,6 +387,7 @@
 			files = (
 				B425042F25DCA05087EF3A16 /* AircraftEnrichmentService.swift in Sources */,
 				9B52CB238F0ADC9E9497663E /* AirlineDatabase.swift in Sources */,
+				BE59B656C96F3A778A7C3CDA /* AirlineLogoDiskCache.swift in Sources */,
 				E8558D994555B39858D3CB05 /* AirlineLogoView.swift in Sources */,
 				19FD34E755410670C8671D5E /* ContentView.swift in Sources */,
 				BAB7812036B8E4CEE747BCCD /* Flight.swift in Sources */,

@@ -13,7 +13,11 @@
 
 **SkyScan** turns your Mac desktop and iPhone Home Screen into an avionics radar display that detects planes flying directly above your head in real time.
 
-[Features](#-features) • [Widget Layouts](#-widget-gallery) • [How It Works](#-how-it-works) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Widget Setup](#-adding-the-widget)
+<p align="center">
+  <img src="screenshots/widget_showcase.png" alt="SkyScan Widgets Showcase" width="820">
+</p>
+
+[Features](#-features) • [App Dashboard](#-application-dashboard) • [Widget Gallery](#-widget-gallery) • [How It Works](#-how-it-works) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Widget Setup](#-adding-the-widget)
 
 </div>
 
@@ -22,13 +26,13 @@
 ## 🌟 Features
 
 - **🎯 Precision Overhead Detection**: Uses trigonometric elevation angles and Haversine ground distance calculations. Planes flying directly overhead ($>35^\circ$ elevation angle or $<3$ miles ground distance) light up with an **`OVERHEAD`** glowing badge.
-- **🏢 Official Airline Logos**: Downloads and renders crisp, transparent airline logos for major international airlines via global CDN.
+- **🏢 Official Airline Logos**: Downloads, caches, and renders official high-resolution airline logos for major international airlines and regional feeders via multi-CDN fallback and offline caching.
 - **✈️ Complete Flight Identity**:
-  - **Airline Name & Logo** (e.g., *United Airlines*, *Delta Air Lines*, *British Airways*, *Lufthansa*)
-  - **Flight Number** (e.g., `UA 1542`, `DL 883`, `BA 177`)
-  - **Aircraft Model & Type Code** (e.g., `Boeing 777-200ER` / `B772`, `Airbus A321neo` / `A21N`)
-  - **Tail Registration** (e.g., `N78013`, `G-XWBA`)
-  - **Route Origin ➔ Destination** (e.g., `SFO ➔ JFK`, `LHR ➔ ORD`)
+  - **Airline Name & Logo** (e.g., *United Airlines*, *Delta Air Lines*, *American Airlines*, *British Airways*, *Lufthansa*)
+  - **Flight Number** (e.g., `UA 1542`, `DL 883`, `AA 104`)
+  - **Aircraft Model & Type Code** (e.g., `Boeing 777-200ER` / `B772`, `Airbus A321neo` / `A21N`, `Boeing 787-9` / `B789`)
+  - **Tail Registration** (e.g., `N78013`, `N523DA`, `N828AA`)
+  - **Route Origin ➔ Destination** (e.g., `SFO ➔ JFK`, `SEA ➔ LAX`, `DFW ➔ ORD`)
 - **⚡ Interactive "Scan Sky" Button (iOS 17+ / macOS 14+)**: Powered by Swift `AppIntents`. Tap the reload icon directly on the widget face to refresh the sky instantly when you hear a plane outside—no need to launch the full app.
 - **📡 Tactical Radar Scope (App)**: A full-screen radar canvas with continuous 360° sweep animations, range rings (5 to 50 mi), compass cardinal marks, and interactive aircraft blips.
 - **📋 Dual-Mode Dashboard**: Seamlessly toggle between the animated **Radar Scope** and a real-time **Flight List**.
@@ -37,15 +41,38 @@
 
 ---
 
+## 🖥️ Application Dashboard
+
+The macOS and iOS app provides both a tactical radar view and an enriched flight manifest:
+
+<p align="center">
+  <img src="screenshots/app_radar.png" alt="Tactical Airspace Radar" width="410">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="screenshots/app_flight_list.png" alt="Enriched Flight List" width="410">
+</p>
+
+- **Tactical Radar Mode** *(Left)*: Real-time polar coordinate radar sweep plotting surrounding aircraft positions, headings, and overhead proximity status.
+- **Flight List Mode** *(Right)*: Sorted by airspace priority, highlighting closest commercial flights with airline liveries, routes, and live telemetry.
+
+---
+
 ## 📱 Widget Gallery
 
 SkyScan supports all standard Apple WidgetKit sizes on both macOS desktop and iOS Home Screen:
 
+<p align="center">
+  <img src="screenshots/widget_small.png" alt="Small Widget" width="200">&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="screenshots/widget_medium.png" alt="Medium Widget" width="450">
+</p>
+
+<p align="center">
+  <img src="screenshots/widget_large.png" alt="Large Airspace Radar Widget" width="450">
+</p>
+
 | Widget Size | Key Information Displayed |
 | :--- | :--- |
-| **Small (`systemSmall`)** | Airline Logo, Flight Number, Rotating Heading Icon, Altitude (`32,000 FT ↗`), Distance badge (`1.8 mi NE`), Speed, and interactive Scan button. |
+| **Small (`systemSmall`)** | Airline Logo, Flight Number, Rotating Heading Icon, Altitude (`32,000 FT ↗`), Distance badge (`0.5 mi N`), Speed, and interactive Scan button. |
 | **Medium (`systemMedium`)** | Dual-pane avionics HUD: Miniature live **Radar Scope** on the left + Flight branding, Route banner (`SFO ➔ JFK`), Aircraft type, Altitude, Speed, and Elevation angle on the right. |
-| **Large (`systemLarge`)** | Full tactical radar circle plotting all nearby aircraft relative to your center location, plus a live table of the top 3 closest overhead flights. |
+| **Large (`systemLarge`)** | Full tactical radar circle plotting all nearby aircraft relative to your center location, plus a live table of the top 3 closest overhead flights with official logos. |
 | **Accessory (Lock Screen)** | Ultra-compact flight callsign, altitude, distance, and aircraft model for Lock Screen and macOS Menu Bar. |
 
 ---
@@ -59,7 +86,7 @@ flowchart LR
     A["📍 CoreLocation / GPS"] --> B["🌐 OpenSky Network API"]
     B --> C["📐 Geometry & Trigonometry Engine"]
     C --> D["🔍 hexdb.io Metadata & Routes"]
-    D --> E["🎨 Airline Logo CDN"]
+    D --> E["🎨 Airline Logo CDN & Cache"]
     E --> F["📱 WidgetKit & SwiftUI Radar"]
 ```
 
@@ -74,7 +101,7 @@ flowchart LR
 4. **Aircraft & Route Enrichment**:
    - Resolves ICAO 24-bit transponder addresses (`Mode S`) via `hexdb.io` to retrieve the aircraft manufacturer, type model, and tail registration.
    - Queries callsign routes to determine scheduled origin and destination airport pairs (`KSFO-KJFK` $\rightarrow$ `SFO ➔ JFK`).
-5. **Logo Rendering in WidgetKit**: Downloads raw PNG bytes during timeline generation so widgets render crisp airline logos offline directly on your desktop or Home Screen.
+5. **Logo Rendering in WidgetKit**: Downloads raw PNG bytes during timeline generation, caches them to disk (`Library/Caches/AirlineLogos/`), and archives CGImage-backed SwiftUI layers so widgets render crisp airline logos offline directly on your desktop or Home Screen.
 
 ---
 
@@ -84,12 +111,20 @@ flowchart LR
 SkyScan/
 ├── project.yml                     # XcodeGen project specification
 ├── SkyScan.xcodeproj               # Ready-to-run Xcode project
+├── screenshots/                    # App & Widget preview assets
+│   ├── app_radar.png               # Main application radar sweep
+│   ├── app_flight_list.png         # Main application flight list
+│   ├── widget_showcase.png         # Comprehensive widget showcase
+│   ├── widget_small.png            # Small systemSmall widget preview
+│   ├── widget_medium.png           # Medium systemMedium widget preview
+│   └── widget_large.png            # Large systemLarge widget preview
 ├── Shared/                         # Shared core business logic
 │   ├── Flight.swift                # Domain model, Haversine distance, elevation math
 │   ├── OpenSkyService.swift        # OpenSky REST API client & parser
 │   ├── AircraftEnrichmentService.swift # Metadata, route & logo fetcher
 │   ├── AirlineDatabase.swift       # Global airline ICAO/IATA catalog & airport resolver
-│   ├── AirlineLogoView.swift       # Multiplatform SwiftUI logo badge
+│   ├── AirlineLogoDiskCache.swift  # Persistent disk cache & pre-bundled airline logos
+│   ├── AirlineLogoView.swift       # Multiplatform SwiftUI logo badge (CGImage-backed)
 │   ├── LocationManager.swift       # CoreLocation manager (macOS + iOS)
 │   ├── RefreshFlightsIntent.swift  # AppIntent for interactive widget refresh
 │   └── UserDefaults+Extensions.swift # App Group persistence & offline cache

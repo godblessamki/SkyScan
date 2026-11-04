@@ -108,7 +108,7 @@ public actor AircraftEnrichmentService {
         }
 
         // 1. Check local persistent disk cache first
-        if let diskData = loadLogoFromDisk(key: key) {
+        if let diskData = AirlineLogoDiskCache.load(key: key) {
             logoCache[key] = diskData
             return diskData
         }
@@ -139,7 +139,7 @@ public actor AircraftEnrichmentService {
                 }
 
                 logoCache[key] = finalData
-                saveLogoToDisk(key: key, data: finalData)
+                AirlineLogoDiskCache.save(key: key, data: finalData)
                 return finalData
             } catch {
                 continue
@@ -174,28 +174,7 @@ public actor AircraftEnrichmentService {
         #endif
     }
 
-    // MARK: - Disk Cache Helpers
-    private var cacheDirectory: URL? {
-        let fileManager = FileManager.default
-        guard let caches = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
-        let dir = caches.appendingPathComponent("AirlineLogos", isDirectory: true)
-        if !fileManager.fileExists(atPath: dir.path) {
-            try? fileManager.createDirectory(at: dir, withIntermediateDirectories: true)
-        }
-        return dir
-    }
 
-    private func loadLogoFromDisk(key: String) -> Data? {
-        guard let dir = cacheDirectory else { return nil }
-        let file = dir.appendingPathComponent("\(key).png")
-        return try? Data(contentsOf: file)
-    }
-
-    private func saveLogoToDisk(key: String, data: Data) {
-        guard let dir = cacheDirectory else { return }
-        let file = dir.appendingPathComponent("\(key).png")
-        try? data.write(to: file, options: .atomic)
-    }
 
     // MARK: - Aircraft Metadata via hexdb.io
     private func fetchAircraftMetadata(icao24: String) async -> AircraftMetadata? {

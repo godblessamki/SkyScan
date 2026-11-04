@@ -1,4 +1,5 @@
 import SwiftUI
+import ImageIO
 
 #if os(macOS)
 import AppKit
@@ -8,39 +9,62 @@ import UIKit
 
 public struct AirlineLogoView: View {
     public let logoData: Data?
+    public let airlineIATA: String?
     public let fallbackText: String
     public let size: CGFloat
     public let isCommercial: Bool
 
-    public init(logoData: Data?, fallbackText: String, size: CGFloat = 28, isCommercial: Bool = false) {
+    public init(logoData: Data?, fallbackText: String, size: CGFloat = 28, isCommercial: Bool = false, airlineIATA: String? = nil) {
         self.logoData = logoData
+        self.airlineIATA = airlineIATA
         self.fallbackText = fallbackText
         self.size = size
         self.isCommercial = isCommercial
     }
 
+    public init(flight: Flight, size: CGFloat = 28) {
+        self.logoData = flight.airlineLogoData
+        self.airlineIATA = flight.airlineIATA
+        self.fallbackText = flight.airlineIATA ?? flight.callsign
+        self.size = size
+        self.isCommercial = flight.isCommercial
+    }
+
     public var body: some View {
         Group {
-            #if os(macOS)
-            if let data = logoData, let nsImg = makeNSImage(from: data) {
-                logoCard(Image(nsImage: nsImg))
+            if let data = resolveData(), let cgImage = makeCGImage(from: data) {
+                // Use Image(decorative:scale:) — WidgetKit can archive CGImage-backed
+                // images across process boundaries, unlike Image(nsImage:) which gets
+                // filtered out by WidgetKit's chrono archiver on macOS.
+                // .renderingMode(.original) prevents SwiftUI from treating it as a
+                // monochrome template mask (which caused white-on-white in dark mode).
+                logoCard(
+                    Image(decorative: cgImage, scale: 2.0)
+                        .renderingMode(.original)
+                )
             } else {
                 fallbackCard
             }
-            #else
-            if let data = logoData, let uiImg = UIImage(data: data) {
-                logoCard(Image(uiImage: uiImg))
-            } else {
-                fallbackCard
-            }
-            #endif
         }
+    }
+
+    /// Resolves logo data from passed data, disk cache, or prebundled offline catalog
+    private func resolveData() -> Data? {
+        if let data = logoData, !data.isEmpty {
+            return data
+        }
+        if let key = airlineIATA ?? (isCommercial ? fallbackText : nil) {
+            let clean = key.trimmingCharacters(in: .whitespacesAndNewlines).prefix(2).uppercased()
+            if let diskData = AirlineLogoDiskCache.load(key: clean) {
+                return diskData
+            }
+        }
+        return nil
     }
 
     @ViewBuilder
     private func logoCard(_ image: Image) -> some View {
         image
-            .renderingMode(.original)
             .interpolation(.high)
             .antialiased(true)
             .resizable()
@@ -78,11 +102,13 @@ public struct AirlineLogoView: View {
         .frame(width: size, height: size)
     }
 
-    #if os(macOS)
-    private func makeNSImage(from data: Data) -> NSImage? {
-        guard let img = NSImage(data: data) else { return nil }
-        img.isTemplate = false // Never treat as monochrome template mask
-        return img
+    /// Creates a CGImage from PNG/JPEG Data using ImageIO.
+    /// CGImage-backed SwiftUI Images archive correctly across WidgetKit's
+    /// out-of-process rendering boundary, unlike NSImage-backed ones.
+    private func makeCGImage(from data: Data) -> CGImage? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            return nil
+        }
+        return CGImageSourceCreateImageAtIndex(source, 0, nil)
     }
-    #endif
 }
